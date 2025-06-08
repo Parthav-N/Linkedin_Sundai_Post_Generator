@@ -27,8 +27,12 @@ document.addEventListener('DOMContentLoaded', function() {
     'http://linkedin-post-generator-backend.onrender.com'
   ];
   
+  // Projects Manager
+  let projectsManager = null;
+  
   // Check API Status
   checkAPIStatus();
+  checkFirebaseStatus();
   
   // Event Listeners
   sendButton.addEventListener('click', sendMessage);
@@ -56,7 +60,309 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize by loading chat history
   loadChatHistory();
   
-  // Main Functions
+  // ===== PROJECTS TAB FUNCTIONALITY =====
+  
+  // Firebase Service for Extension
+  class FirebaseService {
+    constructor() {
+      this.baseUrl = 'https://linkedin-post-generator-backend.onrender.com';
+      this.cache = new Map();
+      this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+    }
+    
+    async fetchProjects() {
+      try {
+        // Check cache first
+        const cached = this.cache.get('projects');
+        if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+          return cached.data;
+        }
+        
+        const response = await fetch(`${this.baseUrl}/get_projects`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Cache the result
+        this.cache.set('projects', {
+          data: data,
+          timestamp: Date.now()
+        });
+        
+        return data;
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        throw error;
+      }
+    }
+    
+    async generateProjectPost(projectData) {
+      try {
+        const response = await fetch(`${this.baseUrl}/generate_project_post`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(projectData)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Error generating project post:', error);
+        throw error;
+      }
+    }
+    
+    clearCache() {
+      this.cache.clear();
+    }
+  }
+  
+  // Projects Tab Manager
+  class ProjectsTabManager {
+    constructor() {
+      this.firebaseService = new FirebaseService();
+      this.projects = [];
+      this.filteredProjects = [];
+      this.isLoading = false;
+      
+      // DOM elements (will be set when tab is initialized)
+      this.projectsList = null;
+      this.projectsLoading = null;
+      this.projectsError = null;
+      this.projectsCount = null;
+      this.searchInput = null;
+    }
+    
+    initialize() {
+      // Get DOM elements
+      this.projectsList = document.getElementById('projects-list');
+      this.projectsLoading = document.getElementById('projects-loading');
+      this.projectsError = document.getElementById('projects-error');
+      this.projectsCount = document.getElementById('projects-count');
+      
+      // Add search functionality
+      this.addSearchBox();
+      
+      // Add retry button functionality
+      const retryButton = document.getElementById('retry-projects');
+      if (retryButton) {
+        retryButton.addEventListener('click', () => this.loadProjects());
+      }
+      
+      // Load projects
+      this.loadProjects();
+    }
+    
+    addSearchBox() {
+      if (!this.projectsList) return;
+      
+      const searchContainer = document.createElement('div');
+      searchContainer.className = 'search-projects';
+      searchContainer.innerHTML = `
+        <input type="text" placeholder="Search projects..." id="search-projects-input">
+      `;
+      
+      this.projectsList.parentNode.insertBefore(searchContainer, this.projectsList);
+      
+      this.searchInput = document.getElementById('search-projects-input');
+      this.searchInput.addEventListener('input', (e) => {
+        this.filterProjects(e.target.value);
+      });
+    }
+    
+    async loadProjects() {
+      if (this.isLoading) return;
+      
+      this.isLoading = true;
+      this.showLoading();
+      
+      try {
+        const response = await this.firebaseService.fetchProjects();
+        
+        if (response.success && response.projects) {
+          this.projects = response.projects;
+          this.filteredProjects = [...this.projects];
+          this.renderProjects();
+          this.updateProjectsCount();
+          this.hideLoading();
+        } else {
+          throw new Error(response.error || 'Failed to fetch projects');
+        }
+      } catch (error) {
+        console.error('Error loading projects:', error);
+        this.showError();
+      } finally {
+        this.isLoading = false;
+      }
+    }
+    
+    filterProjects(searchTerm) {
+      if (!searchTerm.trim()) {
+        this.filteredProjects = [...this.projects];
+      } else {
+        const term = searchTerm.toLowerCase();
+        this.filteredProjects = this.projects.filter(project => 
+          project.title.toLowerCase().includes(term) ||
+          (project.team_lead && project.team_lead.toLowerCase().includes(term)) ||
+          (project.team_members && project.team_members.some(member => 
+            member.toLowerCase().includes(term)
+          ))
+        );
+      }
+      
+      this.renderProjects();
+      this.updateProjectsCount();
+    }
+    
+    renderProjects() {
+      if (!this.projectsList) return;
+      
+      if (this.filteredProjects.length === 0) {
+        this.projectsList.innerHTML = `
+          <div class="no-projects">
+            <p>No projects found${this.searchInput && this.searchInput.value ? ' matching your search' : ''}.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      this.projectsList.innerHTML = this.filteredProjects.map(project => `
+        <div class="project-item" data-project-id="${project.id}">
+          <div class="project-info">
+            <h4 class="project-title">${this.escapeHtml(project.title)}</h4>
+            <div class="project-meta">
+              ${project.team_lead ? `<span class="project-team">👤 ${this.escapeHtml(project.team_lead)}</span>` : ''}
+              ${project.team_members && project.team_members.length > 0 ? 
+                `<span class="project-team">👥 ${project.team_members.length} member${project.team_members.length !== 1 ? 's' : ''}</span>` : ''}
+              ${project.last_updated ? `<span class="project-date">📅 ${this.formatDate(project.last_updated)}</span>` : ''}
+            </div>
+          </div>
+          <div class="project-arrow">→</div>
+        </div>
+      `).join('');
+      
+      // Add click event listeners
+      this.projectsList.querySelectorAll('.project-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          const projectId = e.currentTarget.getAttribute('data-project-id');
+          this.handleProjectClick(projectId);
+        });
+      });
+    }
+    
+    async handleProjectClick(projectId) {
+      const project = this.projects.find(p => p.id === projectId);
+      if (!project) return;
+      
+      try {
+        // Switch to chat tab
+        activateTab('chat');
+        
+        // Show loading in chat
+        loadingIndicator.style.display = 'flex';
+        
+        // Prepare project data for post generation
+        const projectData = {
+          title: project.title,
+          description: project.description || 'No description available',
+          team_lead: project.team_lead || '',
+          team_members: project.team_members || [],
+          demo_url: project.demo_url || '',
+          github_url: project.github_url || '',
+          blog_url: project.blog_url || '',
+          tags: project.tags || []
+        };
+        
+        // Generate LinkedIn post
+        const response = await this.firebaseService.generateProjectPost(projectData);
+        
+        // Hide loading
+        loadingIndicator.style.display = 'none';
+        
+        if (response.success && response.post) {
+          // Add to chat history
+          addUserMessage(`Generate a LinkedIn post for: ${project.title}`);
+          addPostMessage(response.post);
+          currentGeneratedPost = response.post;
+        } else {
+          addBotMessage('Sorry, there was an error generating the LinkedIn post for this project.');
+        }
+        
+      } catch (error) {
+        console.error('Error handling project click:', error);
+        
+        // Hide loading
+        loadingIndicator.style.display = 'none';
+        
+        addBotMessage('Sorry, there was an error generating the LinkedIn post. Please try again.');
+      }
+    }
+    
+    showLoading() {
+      if (this.projectsLoading) this.projectsLoading.style.display = 'flex';
+      if (this.projectsError) this.projectsError.style.display = 'none';
+      if (this.projectsList) this.projectsList.style.display = 'none';
+    }
+    
+    hideLoading() {
+      if (this.projectsLoading) this.projectsLoading.style.display = 'none';
+      if (this.projectsList) this.projectsList.style.display = 'block';
+    }
+    
+    showError() {
+      if (this.projectsLoading) this.projectsLoading.style.display = 'none';
+      if (this.projectsError) this.projectsError.style.display = 'block';
+      if (this.projectsList) this.projectsList.style.display = 'none';
+    }
+    
+    updateProjectsCount() {
+      if (this.projectsCount) {
+        const total = this.projects.length;
+        const filtered = this.filteredProjects.length;
+        
+        if (total === filtered) {
+          this.projectsCount.textContent = `${total} project${total !== 1 ? 's' : ''}`;
+        } else {
+          this.projectsCount.textContent = `${filtered} of ${total} project${total !== 1 ? 's' : ''}`;
+        }
+      }
+    }
+    
+    escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    formatDate(dateString) {
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+        });
+      } catch {
+        return 'Recently';
+      }
+    }
+  }
+  
+  // ===== MAIN FUNCTIONS =====
+  
   function sendMessage() {
     const message = userInput.value.trim();
     if (!message) return;
@@ -67,14 +373,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show loading indicator
     loadingIndicator.style.display = 'flex';
-    chatContainer.style.display = 'none';
     
     // Make API request
     makeNetworkRequest('generate_post', { context: message })
       .then(response => {
         // Hide loading indicator
         loadingIndicator.style.display = 'none';
-        chatContainer.style.display = 'block';
         
         if (response.success) {
           currentGeneratedPost = response.post;
@@ -91,7 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show loading indicator
     loadingIndicator.style.display = 'flex';
-    chatContainer.style.display = 'none';
     
     // Get the last user message
     const lastUserMessage = getLastUserMessage();
@@ -101,7 +404,6 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => {
         // Hide loading indicator
         loadingIndicator.style.display = 'none';
-        chatContainer.style.display = 'block';
         
         if (response.success) {
           // Remove previous post messages
@@ -121,7 +423,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show loading indicator
     loadingIndicator.style.display = 'flex';
-    chatContainer.style.display = 'none';
     
     // Get the last user message
     const lastUserMessage = getLastUserMessage();
@@ -135,7 +436,6 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => {
         // Hide loading indicator
         loadingIndicator.style.display = 'none';
-        chatContainer.style.display = 'block';
         
         if (response.success) {
           // Remove previous post messages
@@ -280,6 +580,12 @@ document.addEventListener('DOMContentLoaded', function() {
         content.classList.remove('active');
       }
     });
+    
+    // Initialize projects tab if selected for the first time
+    if (tabName === 'projects' && !projectsManager) {
+      projectsManager = new ProjectsTabManager();
+      projectsManager.initialize();
+    }
   }
   
   // Settings Functions
@@ -355,6 +661,40 @@ document.addEventListener('DOMContentLoaded', function() {
     apiStatusElement.style.color = 'red';
   }
   
+  // Firebase Status Check
+  async function checkFirebaseStatus() {
+    const firebaseStatusElement = document.getElementById('firebase-status');
+    if (!firebaseStatusElement) return;
+    
+    firebaseStatusElement.textContent = 'Checking...';
+    
+    for (const baseUrl of baseUrls) {
+      try {
+        const response = await fetch(`${baseUrl}/projects_health`, {
+          method: 'GET'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.firebase_connected) {
+            firebaseStatusElement.textContent = '✅ Connected';
+            firebaseStatusElement.style.color = 'green';
+          } else {
+            firebaseStatusElement.textContent = '❌ Not Connected';
+            firebaseStatusElement.style.color = 'red';
+          }
+          return;
+        }
+      } catch (error) {
+        console.error(`Error checking Firebase status:`, error);
+        // Continue to next URL
+      }
+    }
+    
+    firebaseStatusElement.textContent = '❌ Error';
+    firebaseStatusElement.style.color = 'red';
+  }
+  
   // Persistence Functions
   function saveChatHistory() {
     // Save chat history to session storage (cleared when browser closes)
@@ -418,8 +758,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // No history - add a welcome message
         addBotMessage('Welcome to LinkedIn Assistant Pro! I can help you with:' + 
                      '\n\n1. Generating engaging LinkedIn posts - just type what you want to post about' + 
-                     '\n2. Auto-generating comments on LinkedIn posts (enabled by default)' +
-                     '\n\nTo configure settings, use the Settings tab above.');
+                     '\n2. Browse Sundai Club projects and generate posts for them' +
+                     '\n3. Auto-generating comments on LinkedIn posts (enabled by default)' +
+                     '\n\nUse the tabs above to switch between features!');
       }
     });
   }
@@ -478,8 +819,9 @@ document.addEventListener('DOMContentLoaded', function() {
       chatContainer.innerHTML = '';
       addBotMessage('Welcome to LinkedIn Assistant Pro! I can help you with:' + 
                    '\n\n1. Generating engaging LinkedIn posts - just type what you want to post about' + 
-                   '\n2. Auto-generating comments on LinkedIn posts (enabled by default)' +
-                   '\n\nTo configure settings, use the Settings tab above.');
+                   '\n2. Browse Sundai Club projects and generate posts for them' +
+                   '\n3. Auto-generating comments on LinkedIn posts (enabled by default)' +
+                   '\n\nUse the tabs above to switch between features!');
     });
     
     headerDiv.appendChild(clearButton);

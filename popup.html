@@ -11,9 +11,10 @@
       <h1>LinkedIn Assistant Pro</h1>
     </div>
     
-    <!-- Tabs -->
+    <!-- Updated Tabs with Projects -->
     <div class="tabs">
       <div class="tab active" data-tab="chat">Post Generator</div>
+      <div class="tab" data-tab="projects">Projects</div>
       <div class="tab" data-tab="settings">Settings</div>
     </div>
     
@@ -36,6 +37,32 @@
       </div>
     </div>
     
+    <!-- NEW: Projects Tab -->
+    <div class="tab-content" id="projects-tab">
+      <div class="projects-container">
+        <div class="projects-header">
+          <h3>Sundai Club Projects</h3>
+          <div class="projects-stats">
+            <span id="projects-count">Loading...</span>
+          </div>
+        </div>
+        
+        <div class="projects-loading" id="projects-loading">
+          <div class="spinner"></div>
+          <p>Loading projects...</p>
+        </div>
+        
+        <div class="projects-error" id="projects-error" style="display: none;">
+          <p>Unable to load projects. Please check your connection.</p>
+          <button id="retry-projects">Retry</button>
+        </div>
+        
+        <div class="projects-list" id="projects-list">
+          <!-- Projects will be inserted here -->
+        </div>
+      </div>
+    </div>
+    
     <!-- Settings Tab -->
     <div class="tab-content" id="settings-tab">
       <div style="padding: 16px;">
@@ -52,6 +79,11 @@
         <div class="setting-item">
           <div>Backend API Status:</div>
           <div id="api-status">Checking...</div>
+        </div>
+        
+        <div class="setting-item">
+          <div>Firebase Database:</div>
+          <div id="firebase-status">Checking...</div>
         </div>
         
         <button id="save-settings">Save Settings</button>
