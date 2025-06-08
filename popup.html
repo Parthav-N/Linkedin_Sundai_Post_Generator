@@ -11,9 +11,10 @@
       <h1>LinkedIn Assistant Pro</h1>
     </div>
     
-    <!-- Updated Tabs with Projects -->
+    <!-- Updated Tabs with Templates and Projects -->
     <div class="tabs">
       <div class="tab active" data-tab="chat">Post Generator</div>
+      <div class="tab" data-tab="templates">Templates</div>
       <div class="tab" data-tab="projects">Projects</div>
       <div class="tab" data-tab="settings">Settings</div>
     </div>
@@ -63,16 +64,115 @@
       </div>
     </div>
     
+    <!-- Templates Tab -->
+    <div class="tab-content" id="templates-tab">
+      <div class="templates-container">
+        <div class="templates-header">
+          <h3>LinkedIn Post Templates</h3>
+          <div class="templates-recommended">Recommended for today</div>
+        </div>
+        
+        <div class="templates-categories">
+          <!-- Template categories will be inserted here -->
+        </div>
+        
+        <div class="template-form-container" style="display: none;">
+          <div class="template-form-header">
+            <button class="back-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              Back to templates
+            </button>
+            <h3 class="template-title">Template Name</h3>
+          </div>
+          
+          <form id="template-form" class="template-form">
+            <div class="template-fields">
+              <!-- Template fields will be inserted here -->
+            </div>
+            
+            <div class="template-customization">
+              <h4>Customize Your Post</h4>
+              
+              <div class="customization-option">
+                <label for="post-tone">Tone:</label>
+                <select id="post-tone" name="tone">
+                  <option value="professional">Professional</option>
+                  <option value="conversational">Conversational</option>
+                  <option value="enthusiastic">Enthusiastic</option>
+                  <option value="authoritative">Authoritative</option>
+                  <option value="thoughtful">Thoughtful</option>
+                </select>
+              </div>
+              
+              <div class="customization-option">
+                <label for="post-length">Length:</label>
+                <select id="post-length" name="length">
+                  <option value="concise">Concise (1-2 paragraphs)</option>
+                  <option value="standard">Standard (3-4 paragraphs)</option>
+                  <option value="detailed">Detailed (5+ paragraphs)</option>
+                </select>
+              </div>
+              
+              <div class="customization-option">
+                <label for="humanize-level">Make it sound:</label>
+                <div class="humanize-slider-container">
+                  <span>AI-like</span>
+                  <input type="range" id="humanize-level" name="humanize" min="1" max="5" value="4">
+                  <span>Human-like</span>
+                </div>
+              </div>
+            </div>
+            
+            <button type="submit" id="generate-from-template" class="generate-template-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"></path><path d="M12 18v4"></path><path d="m4.93 4.93 2.83 2.83"></path><path d="m16.24 16.24 2.83 2.83"></path><path d="M2 12h4"></path><path d="M18 12h4"></path><path d="m4.93 19.07 2.83-2.83"></path><path d="m16.24 7.76 2.83-2.83"></path></svg>
+              Generate Post
+            </button>
+          </form>
+        </div>
+        
+        <div class="template-loading" style="display: none;">
+          <div class="spinner"></div>
+          <p>Generating your post...</p>
+        </div>
+      </div>
+    </div>
+    
     <!-- Settings Tab -->
     <div class="tab-content" id="settings-tab">
       <div style="padding: 16px;">
         <div class="setting-item">
           <label>
             <input type="checkbox" id="enableAutoComments" checked>
-            Enable Auto-Comments
+            Enable AI Comment Assistant
           </label>
-          <div class="description">
-            Automatically generate comments when you open LinkedIn comment boxes
+          <p class="setting-description">When enabled, the extension will offer to generate comments for LinkedIn posts.</p>
+        </div>
+        
+        <!-- Template Customization Section -->
+        <div class="setting-item template-customization-settings">
+          <h3>Template Customization</h3>
+          <p class="setting-description">Paste example posts to customize how your templates are generated.</p>
+          
+          <div class="template-example-section">
+            <label for="template-example">Example Post:</label>
+            <textarea id="template-example" placeholder="Paste an example LinkedIn post here to use as a reference for your generated content..." rows="6"></textarea>
+          </div>
+          
+          <div class="template-example-section">
+            <label for="template-url">Example URL:</label>
+            <input type="text" id="template-url" placeholder="Or paste a URL to a LinkedIn post to use as reference">
+          </div>
+          
+          <div class="template-style-options">
+            <h4>Tone Preferences</h4>
+            <div class="style-option">
+              <input type="checkbox" id="always-native-english" checked>
+              <label for="always-native-english">Always use native English</label>
+            </div>
+            <div class="style-option">
+              <input type="checkbox" id="sundai-style" checked>
+              <label for="sundai-style">Use Sundai Club tone and style</label>
+            </div>
           </div>
         </div>
         
@@ -128,6 +228,9 @@
           <button class="action-button regenerate-button" title="Regenerate">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
           </button>
+          <button class="action-button edit-button" title="Edit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>
+          </button>
           <button class="action-button reduce-button" title="Reduce">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
           </button>
@@ -144,5 +247,8 @@
   </template>
   
   <script src="popup.js"></script>
+  <!-- Template Scripts -->
+  <script src="templates.js"></script>
+  <script src="template-manager.js"></script>
 </body>
 </html>

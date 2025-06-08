@@ -516,3 +516,272 @@ hr {
   cursor: pointer;
   margin-top: 8px;
 }
+
+/* === Templates Tab Styles === */
+.templates-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.templates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.templates-header h3 {
+  margin: 0;
+  color: #0077B5;
+  font-size: 16px;
+}
+
+.templates-recommended {
+  font-size: 12px;
+  color: #0077B5;
+  background-color: rgba(0, 119, 181, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.templates-categories {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+
+.template-card {
+  background-color: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.template-card:hover {
+  border-color: #0077B5;
+  box-shadow: 0 2px 8px rgba(0, 119, 181, 0.1);
+  transform: translateY(-2px);
+}
+
+.template-card.recommended {
+  border-color: #0077B5;
+  box-shadow: 0 2px 8px rgba(0, 119, 181, 0.1);
+}
+
+.template-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.template-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.template-description {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+  flex-grow: 1;
+}
+
+.template-days {
+  font-size: 11px;
+  color: #0077B5;
+  display: flex;
+  align-items: center;
+}
+
+.template-days svg {
+  margin-right: 4px;
+}
+
+.template-form-container {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.template-form-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #0077B5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  margin-right: 8px;
+  font-size: 12px;
+}
+
+.back-button svg {
+  margin-right: 4px;
+}
+
+.template-title {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+  flex-grow: 1;
+}
+
+.template-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.template-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.field-input {
+  padding: 8px 12px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.field-input:focus {
+  border-color: #0077B5;
+  outline: none;
+}
+
+.field-select {
+  padding: 8px 12px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.field-textarea {
+  padding: 8px 12px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 14px;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.template-customization {
+  background-color: #f5f7f9;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.template-customization h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.customization-option {
+  margin-bottom: 12px;
+}
+
+.customization-option label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+.customization-option select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: white;
+}
+
+.humanize-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.humanize-slider-container input {
+  flex-grow: 1;
+}
+
+.generate-template-button {
+  background-color: #0077B5;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 16px;
+  transition: background-color 0.2s;
+}
+
+.generate-template-button:hover {
+  background-color: #006097;
+}
+
+.generate-template-button svg {
+  margin-right: 8px;
+}
+
+.template-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.required-field::after {
+  content: '*';
+  color: #d73527;
+  margin-left: 2px;
+}

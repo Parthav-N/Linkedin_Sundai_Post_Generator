@@ -364,94 +364,232 @@ document.addEventListener('DOMContentLoaded', function() {
   // ===== MAIN FUNCTIONS =====
   
   function sendMessage() {
-    const message = userInput.value.trim();
-    if (!message) return;
+    const text = userInput.value.trim();
+    if (!text) return;
     
     // Add user message to chat
-    addUserMessage(message);
+    addUserMessage(text);
+    
+    // Clear input
     userInput.value = '';
     
     // Show loading indicator
-    loadingIndicator.style.display = 'flex';
+    showLoadingIndicator();
     
     // Make API request
-    makeNetworkRequest('generate_post', { context: message })
-      .then(response => {
-        // Hide loading indicator
-        loadingIndicator.style.display = 'none';
-        
-        if (response.success) {
-          currentGeneratedPost = response.post;
-          addPostMessage(response.post);
-          chatContainer.scrollTop = chatContainer.scrollHeight;
+    makeNetworkRequest('generate', { prompt: text })
+      .then(result => {
+        if (result.success) {
+          currentGeneratedPost = result.post;
+          window.lastGeneratedPostData = { post: result.post };
+          addPostMessage(result.post);
         } else {
-          addBotMessage(response.error || 'Sorry, there was an error generating your post.');
+          addBotMessage('Error: ' + (result.error || 'Failed to generate post'));
         }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        addBotMessage('Error: ' + error.message);
+      })
+      .finally(() => {
+        hideLoadingIndicator();
       });
   }
   
+  function showLoadingIndicator() {
+    loadingIndicator.style.display = 'flex';
+  }
+  
+  function hideLoadingIndicator() {
+    loadingIndicator.style.display = 'none';
+  }
+  
   function regeneratePost() {
-    if (!hasUserMessages()) return;
+    if (!currentGeneratedPost) {
+      addBotMessage('No post to regenerate. Please generate a post first.');
+      return;
+    }
     
     // Show loading indicator
-    loadingIndicator.style.display = 'flex';
+    showLoadingIndicator();
     
-    // Get the last user message
+    // Check if we have a template request to regenerate from
+    if (window.lastTemplateRequest && window.templateManager) {
+      // Use template manager to regenerate
+      window.templateManager.regenerateLastPost()
+        .then(regeneratedPost => {
+          if (regeneratedPost) {
+            // Remove previous post messages
+            removePostMessages();
+            
+            // Update current post
+            currentGeneratedPost = regeneratedPost;
+            addPostMessage(regeneratedPost);
+          } else {
+            addBotMessage('Failed to regenerate post from template.');
+          }
+        })
+        .catch(error => {
+          console.error('Error regenerating post:', error);
+          addBotMessage('Error: ' + error.message);
+        })
+        .finally(() => {
+          hideLoadingIndicator();
+        });
+      return;
+    }
+    
+    // Get the last user message for direct regeneration
     const lastUserMessage = getLastUserMessage();
+    if (!lastUserMessage) {
+      hideLoadingIndicator();
+      addBotMessage('No prompt found to regenerate post.');
+      return;
+    }
+    
+    // Remove previous post messages
+    removePostMessages();
     
     // Make API request
-    makeNetworkRequest('regenerate_post', { context: lastUserMessage })
-      .then(response => {
-        // Hide loading indicator
-        loadingIndicator.style.display = 'none';
-        
-        if (response.success) {
-          // Remove previous post messages
-          removePostMessages();
-          
-          currentGeneratedPost = response.post;
-          addPostMessage(response.post);
-          chatContainer.scrollTop = chatContainer.scrollHeight;
+    makeNetworkRequest('generate', { prompt: lastUserMessage })
+      .then(result => {
+        if (result.success) {
+          currentGeneratedPost = result.post;
+          window.lastGeneratedPostData = { post: result.post };
+          addPostMessage(result.post);
         } else {
-          addBotMessage(response.error || 'Sorry, there was an error regenerating your post.');
+          addBotMessage('Error: ' + (result.error || 'Failed to regenerate post'));
         }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        addBotMessage('Error: ' + error.message);
+      })
+      .finally(() => {
+        hideLoadingIndicator();
       });
   }
   
   function modifyPost(action) {
-    if (!currentGeneratedPost || !hasUserMessages()) return;
+    if (!currentGeneratedPost) {
+      addBotMessage('No post to modify. Please generate a post first.');
+      return;
+    }
     
     // Show loading indicator
-    loadingIndicator.style.display = 'flex';
+    showLoadingIndicator();
     
-    // Get the last user message
-    const lastUserMessage = getLastUserMessage();
+    // If the action is 'edit', we'll open an editor dialog
+    if (action === 'edit') {
+      // Create an edit dialog
+      const editDialog = document.createElement('div');
+      editDialog.className = 'edit-dialog';
+      editDialog.innerHTML = `
+        <div class="edit-dialog-content">
+          <h3>Edit Post</h3>
+          <textarea id="post-edit-area" rows="10">${currentGeneratedPost}</textarea>
+          <div class="edit-dialog-buttons">
+            <button id="cancel-edit">Cancel</button>
+            <button id="save-edit">Save</button>
+          </div>
+        </div>
+      `;
+      
+      // Add styles for the dialog
+      const style = document.createElement('style');
+      style.textContent = `
+        .edit-dialog {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+        .edit-dialog-content {
+          background-color: white;
+          padding: 20px;
+          border-radius: 8px;
+          width: 80%;
+          max-width: 500px;
+        }
+        #post-edit-area {
+          width: 100%;
+          padding: 10px;
+          margin: 10px 0;
+          font-family: inherit;
+        }
+        .edit-dialog-buttons {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+        }
+      `;
+      
+      document.head.appendChild(style);
+      document.body.appendChild(editDialog);
+      
+      // Add event listeners
+      document.getElementById('cancel-edit').addEventListener('click', () => {
+        document.body.removeChild(editDialog);
+        hideLoadingIndicator();
+      });
+      
+      document.getElementById('save-edit').addEventListener('click', () => {
+        const editedPost = document.getElementById('post-edit-area').value;
+        document.body.removeChild(editDialog);
+        
+        // Update the current post
+        currentGeneratedPost = editedPost;
+        
+        // Remove previous post messages
+        removePostMessages();
+        
+        // Add the edited post
+        addPostMessage(editedPost);
+        
+        // Hide loading indicator
+        hideLoadingIndicator();
+      });
+      
+      return;
+    }
     
-    // Make API request
-    makeNetworkRequest('modify_post', {
-      context: lastUserMessage,
-      current_post: currentGeneratedPost,
+    // For other actions (reduce, elaborate), make API request
+    makeNetworkRequest('modify_post', { 
+      post: currentGeneratedPost,
       action: action
     })
-      .then(response => {
-        // Hide loading indicator
-        loadingIndicator.style.display = 'none';
-        
-        if (response.success) {
+      .then(result => {
+        if (result.success) {
           // Remove previous post messages
           removePostMessages();
           
-          currentGeneratedPost = response.post;
-          addPostMessage(response.post);
-          chatContainer.scrollTop = chatContainer.scrollHeight;
+          currentGeneratedPost = result.post;
+          window.lastGeneratedPostData = { post: result.post };
+          addPostMessage(result.post);
         } else {
-          addBotMessage(response.error || `Sorry, there was an error ${action}ing your post.`);
+          addBotMessage('Error: ' + (result.error || `Failed to ${action} post`));
         }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        addBotMessage('Error: ' + error.message);
+      })
+      .finally(() => {
+        hideLoadingIndicator();
       });
   }
   
   function insertIntoLinkedIn() {
-    if (!currentGeneratedPost) return;
+    if (!currentGeneratedPost) {
+      addBotMessage('No post to insert. Please generate a post first.');
+      return;
+    }
     
     // Send message to content script to insert the post
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -511,8 +649,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const postContent = template.querySelector('.post-content');
     postContent.textContent = text;
     
+    // Update the current generated post variable
+    currentGeneratedPost = text;
+    
     // Add event listeners to buttons
     template.querySelector('.regenerate-button').addEventListener('click', regeneratePost);
+    template.querySelector('.edit-button').addEventListener('click', () => modifyPost('edit'));
     template.querySelector('.reduce-button').addEventListener('click', () => modifyPost('reduce'));
     template.querySelector('.elaborate-button').addEventListener('click', () => modifyPost('elaborate'));
     template.querySelector('.share-button').addEventListener('click', insertIntoLinkedIn);
@@ -781,7 +923,11 @@ document.addEventListener('DOMContentLoaded', function() {
           const data = await response.json();
           return {
             success: true,
-            post: data.post || data.comment
+            post: data.post || data.comment,
+            action: data.action,
+            template: data.template,
+            tone: data.tone,
+            length: data.length
           };
         }
       } catch (error) {
@@ -829,4 +975,8 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Add the clear history button
   addClearHistoryButton();
+  
+  // Make addPostMessage and activateTab available globally for template manager
+  window.addPostMessage = addPostMessage;
+  window.activateTab = activateTab;
 });
