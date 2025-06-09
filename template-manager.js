@@ -174,8 +174,7 @@ class TemplateManager {
     const recommendedText = this.templatesTab.querySelector('.templates-recommended');
     
     if (recommendedTemplates.length > 0) {
-      const day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-      recommendedText.textContent = `Recommended for ${day}`;
+      recommendedText.textContent = 'Recommended for Sundai';
     } else {
       recommendedText.style.display = 'none';
     }
@@ -220,7 +219,13 @@ class TemplateManager {
       
       // Add the generated post to the chat
       if (window.addPostMessage && typeof window.addPostMessage === 'function') {
-        window.currentGeneratedPost = generatedPost;
+        if (typeof currentGeneratedPost !== 'undefined') {
+          currentGeneratedPost = generatedPost;
+        } else {
+          window.currentGeneratedPost = generatedPost;
+        }
+        
+        console.log('Post generado desde template:', generatedPost);
         window.addPostMessage(generatedPost);
         
         // Switch to chat tab to show the result

@@ -785,3 +785,379 @@ hr {
   color: #d73527;
   margin-left: 2px;
 }
+
+/* Template Management Styles */
+.template-management {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.template-list-container {
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.template-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f5f7f9;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.template-list-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button:hover {
+  background-color: #eef3f8;
+  color: #0077B5;
+}
+
+.template-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Ensure template items take full width */
+.template-item {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Make sure template info takes available space */
+.template-info {
+  min-width: 0; /* This allows text truncation to work */
+  flex: 1;
+}
+
+.template-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e1e4e8;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: background-color 0.2s;
+  overflow: hidden;
+}
+
+.template-item:hover {
+  background-color: #f9f9f9;
+}
+
+.template-item.active {
+  background-color: #eef7ff;
+  border-left: 3px solid #0077B5;
+}
+
+.template-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+}
+
+.template-info {
+  flex: 1;
+}
+
+.template-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.template-description {
+  font-size: 12px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  line-height: 1.4;
+  max-height: 2.8em;
+  /* Fallback for non-webkit browsers */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.template-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.template-item:hover .template-actions {
+  opacity: 1;
+}
+
+.template-editor {
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: white;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.editor-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #0077B5;
+  box-shadow: 0 0 0 2px rgba(0, 119, 181, 0.2);
+}
+
+textarea.form-control {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.days-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.day-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f5f7f9;
+}
+
+.day-checkbox input[type="checkbox"] {
+  margin: 0;
+}
+
+.template-fields {
+  margin-top: 12px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.field-item {
+  padding: 12px;
+  border-bottom: 1px solid #e1e4e8;
+  background-color: #f9f9f9;
+}
+
+.field-item:last-child {
+  border-bottom: none;
+}
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.field-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.field-actions button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.field-actions button:hover {
+  background-color: #e1e4e8;
+}
+
+.field-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.field-row > div {
+  flex: 1;
+}
+
+.setting-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e1e4e8;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background-color: #0077B5;
+  color: white;
+  border-color: #0077B5;
+}
+
+.btn-primary:hover {
+  background-color: #006097;
+  border-color: #005b8c;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid #e1e4e8;
+  color: #333;
+}
+
+.btn-outline:hover {
+  background-color: #f5f7f9;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #0077B5;
+  text-decoration: underline;
+  padding: 8px 0;
+}
+
+.btn-link:hover {
+  color: #005b8c;
+}
+
+.form-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.form-group-header label {
+  margin-bottom: 0;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.empty-state p {
+  margin-bottom: 16px;
+}
+
+.field-options {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: white;
+  border: 1px dashed #e1e4e8;
+  border-radius: 4px;
+}
+
+.field-option {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.field-option:last-child {
+  margin-bottom: 0;
+}
+
+.field-option input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+}
+
+.add-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #0077B5;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.add-option:hover {
+  text-decoration: underline;
+}

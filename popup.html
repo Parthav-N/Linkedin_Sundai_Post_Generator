@@ -148,30 +148,91 @@
           <p class="setting-description">When enabled, the extension will offer to generate comments for LinkedIn posts.</p>
         </div>
         
-        <!-- Template Customization Section -->
-        <div class="setting-item template-customization-settings">
-          <h3>Template Customization</h3>
-          <p class="setting-description">Paste example posts to customize how your templates are generated.</p>
-          
-          <div class="template-example-section">
-            <label for="template-example">Example Post:</label>
-            <textarea id="template-example" placeholder="Paste an example LinkedIn post here to use as a reference for your generated content..." rows="6"></textarea>
-          </div>
-          
-          <div class="template-example-section">
-            <label for="template-url">Example URL:</label>
-            <input type="text" id="template-url" placeholder="Or paste a URL to a LinkedIn post to use as reference">
-          </div>
-          
-          <div class="template-style-options">
-            <h4>Tone Preferences</h4>
-            <div class="style-option">
-              <input type="checkbox" id="always-native-english" checked>
-              <label for="always-native-english">Always use native English</label>
+        <!-- Template Management Section -->
+        <div class="setting-item">
+          <h3>Template Management</h3>
+          <div class="template-management">
+            <div class="template-list-container">
+              <div class="template-list-header">
+                <h4>Available Templates</h4>
+                <button id="add-template-btn" class="icon-button" title="Add New Template">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+              </div>
+              <div id="template-list" class="template-list">
+                <!-- Template list will be populated by JavaScript -->
+              </div>
             </div>
-            <div class="style-option">
-              <input type="checkbox" id="sundai-style" checked>
-              <label for="sundai-style">Use Sundai Club tone and style</label>
+            
+            <div id="template-editor" class="template-editor" style="display: none;">
+              <div class="editor-header">
+                <h4 id="editor-title">Edit Template</h4>
+                <div class="editor-actions">
+                  <button id="save-template" class="btn btn-primary">Save</button>
+                  <button id="cancel-edit" class="btn btn-link">Cancel</button>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="template-name">Template Name</label>
+                <input type="text" id="template-name" class="form-control" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="template-description">Description</label>
+                <textarea id="template-description" class="form-control" rows="2"></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label for="template-icon">Icon (Emoji)</label>
+                <input type="text" id="template-icon" class="form-control" maxlength="2">
+              </div>
+              
+              <div class="form-group">
+                <label>Recommended Days</label>
+                <div class="days-selector">
+                  <label class="day-checkbox">
+                    <input type="checkbox" value="Monday"> Mon
+                  </label>
+                  <label class="day-checkbox">
+                    <input type="checkbox" value="Tuesday"> Tue
+                  </label>
+                  <label class="day-checkbox">
+                    <input type="checkbox" value="Wednesday"> Wed
+                  </label>
+                  <label class="day-checkbox">
+                    <input type="checkbox" value="Thursday"> Thu
+                  </label>
+                  <label class="day-checkbox">
+                    <input type="checkbox" value="Friday"> Fri
+                  </label>
+                  <label class="day-checkbox">
+                    <input type="checkbox" value="Saturday"> Sat
+                  </label>
+                  <label class="day-checkbox">
+                    <input type="checkbox" value="Sunday"> Sun
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <div class="form-group-header">
+                  <label>Template Fields</label>
+                  <button type="button" id="add-field" class="btn btn-sm btn-outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Field
+                  </button>
+                </div>
+                
+                <div id="template-fields" class="template-fields">
+                  <!-- Fields will be added here -->
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="template-examples">Example Posts (one per line)</label>
+                <textarea id="template-examples" class="form-control" rows="4" placeholder="Add example posts to help guide the AI..."></textarea>
+              </div>
             </div>
           </div>
         </div>
@@ -186,7 +247,10 @@
           <div id="firebase-status">Checking...</div>
         </div>
         
-        <button id="save-settings">Save Settings</button>
+        <div class="setting-actions">
+          <button id="save-settings" class="btn btn-primary">Save All Settings</button>
+          <button id="reset-templates" class="btn btn-link">Reset to Default Templates</button>
+        </div>
       </div>
     </div>
   </div>
@@ -250,5 +314,6 @@
   <!-- Template Scripts -->
   <script src="templates.js"></script>
   <script src="template-manager.js"></script>
+  <script src="template-settings.js"></script>
 </body>
 </html>
